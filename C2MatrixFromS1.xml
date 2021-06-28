@@ -1,6 +1,19 @@
 <graph id="C2MatrixFromS1">
 	<version>1.0</version>
 	
+	<!-- from https://forum.step.esa.int/t/gpt-hangs-during-polarimetry-graph/9738/6:
+	
+	Resolved by calling gpt with the -c parameter set at 75% of the java heap space.
+
+		eg:
+		“gpt -c 24G”
+
+	The java heap space is set using -Xmx in gpt.vmoptions.
+	This has also reduced the time for my processing chain to run by a factor of 4
+
+	gpt - - diag was also helpful.
+	-->
+	
 	<node id="Read">
       <operator>Read</operator>
       <sources/>
@@ -37,21 +50,11 @@
         <source>Calibration</source>
       </sources>
     </node>	
-	
-    <node id="Subset">
-      <operator>Subset</operator>
-      <sources>
-        <source>Deburst</source>
-      </sources>
-      <parameters>
-        <geoRegion>POLYGON((-134.5660400390625 68.4980537431752, -133.385009765625 68.4980537431752, -133.385009765625 68.99780152328965, -134.5660400390625 68.99780152328965, -134.5660400390625 68.4980537431752))</geoRegion>
-      </parameters>
-    </node>
-	
+
 	<node id="Multilook">
       <operator>Multilook</operator>
       <sources>
-        <source>Subset</source>
+        <source>Deburst</source>
       </sources>
       <parameters>
         <nRgLooks>3</nRgLooks>
@@ -81,44 +84,30 @@
       </parameters>
     </node>
 	
-	<node id="Terrain-Correction">
-      <operator>Terrain-Correction</operator>
+	<node id="HAlpha">
+      <operator>Polarimetric-Decomposition</operator>
       <sources>
         <source>PSF</source>
       </sources>
       <parameters>
-        <demName>GETASSE30</demName>
-	    <demResamplingMethod>BILINEAR_INTERPOLATION</demResamplingMethod>
-	    <imgResamplingMethod>BILINEAR_INTERPOLATION</imgResamplingMethod>
-        <pixelSpacingInMeter>20</pixelSpacingInMeter>
-        <mapProjection>PROJCS["WGS 84 / UTM zone 8N",GEOGCS["WGS 84",DATUM["WGS_1984",SPHEROID["WGS 84",6378137,298.257223563,AUTHORITY["EPSG","7030"]],AUTHORITY["EPSG","6326"]],PRIMEM["Greenwich",0,AUTHORITY["EPSG","8901"]],UNIT["degree",0.01745329251994328,AUTHORITY["EPSG","9122"]],AUTHORITY["EPSG","4326"]],UNIT["metre",1,AUTHORITY["EPSG","9001"]],PROJECTION["Transverse_Mercator"],PARAMETER["latitude_of_origin",0],PARAMETER["central_meridian",-135],PARAMETER["scale_factor",0.9996],PARAMETER["false_easting",500000],PARAMETER["false_northing",0],AUTHORITY["EPSG","32608"],AXIS["Easting",EAST],AXIS["Northing",NORTH]]</mapProjection>
-        <nodataValueAtSea>true</nodataValueAtSea>
-        <saveDEM>true</saveDEM>
-        <saveLatLon>false</saveLatLon>
-        <saveIncidenceAngleFromEllipsoid>false</saveIncidenceAngleFromEllipsoid>
-        <saveLocalIncidenceAngle>true</saveLocalIncidenceAngle>
-        <saveProjectedLocalIncidenceAngle>false</saveProjectedLocalIncidenceAngle>
-        <saveSelectedSourceBand>true</saveSelectedSourceBand>
-        <outputComplex>true</outputComplex>
-        <applyRadiometricNormalization>false</applyRadiometricNormalization>
-        <saveSigmaNought>false</saveSigmaNought>
-        <saveGammaNought>false</saveGammaNought>
-        <saveBetaNought>false</saveBetaNought>
+        <decomposition>H-Alpha Dual Pol Decomposition</decomposition>
+        <windowSize>5</windowSize>
+        <outputHAAlpha>true</outputHAAlpha>
       </parameters>
     </node>
 	
     <node id="Write">
       <operator>Write</operator>
       <sources>
-        <source>Terrain-Correction</source>
+        <source>HAlpha</source>
       </sources>
       <parameters>
         <file>$output_file</file>
-        <formatName>$format</formatName>
+        <formatName>BEAM-DIMAP</formatName>
         <deleteOutputOnFailure>false</deleteOutputOnFailure>
         <writeEntireTileRows>false</writeEntireTileRows>
         <clearCacheAfterRowWrite>false</clearCacheAfterRowWrite>
       </parameters>
-    </node>
+    </node>	
 	
 </graph>
