@@ -1,22 +1,6 @@
 <graph id="HAlphaFromS1">
 	<version>1.0</version>
 	
-	<!-- 
-	gpt/SNAP kept hanging when I tried to run the C2 matrix operator. I found this solution on the SNAP forums: https://forum.step.esa.int/t/gpt-hangs-during-polarimetry-graph/9738/6:
-	
-	"
-	Resolved by calling gpt with the -c parameter set at 75% of the java heap space.
-
-		eg:
-		“gpt -c 24G”
-
-	The java heap space is set using -Xmx in gpt.vmoptions.
-	This has also reduced the time for my processing chain to run by a factor of 4
-	"
-	
-	On Gwen's machine (as with yours, I believe), the Java heapspace is set to 44Gb (out of a total of 64Gb RAM available). 75% equates to 33G, so I ran this graph using `gpt -c 33G ...`, and it worked.
-	-->
-	
 	<node id="Read">
       <operator>Read</operator>
       <sources/>
